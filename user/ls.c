@@ -4,21 +4,21 @@
 #include "kernel/fs.h"
 
 char*
-fmtname(char *path)
+fmtname(char *path) // 给定的路径 path 中提取出最后一个斜杠 / 后面的文件名或目录名
 {
   static char buf[DIRSIZ+1];
   char *p;
 
   // Find first character after last slash.
-  for(p=path+strlen(path); p >= path && *p != '/'; p--)
+  for(p=path+strlen(path); p >= path && *p != '/'; p--) // p 指向 path 末尾，向前找第一个 / 
     ;
   p++;
 
   // Return blank-padded name.
   if(strlen(p) >= DIRSIZ)
     return p;
-  memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  memmove(buf, p, strlen(p)); // 如果文件名小于 DIRSIZ，就把 p 复制到 buf 中
+  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p)); // 文件名后面填充 0 直到 长度跟 DIRSIZ 一致
   return buf;
 }
 
@@ -30,19 +30,19 @@ ls(char *path)
   struct dirent de;
   struct stat st;
 
-  if((fd = open(path, 0)) < 0){
+  if((fd = open(path, 0)) < 0){   // 文件打开是否成功
     fprintf(2, "ls: cannot open %s\n", path);
     return;
   }
 
-  if(fstat(fd, &st) < 0){
+  if(fstat(fd, &st) < 0){   // 获取文件信息是否成功
     fprintf(2, "ls: cannot stat %s\n", path);
     close(fd);
     return;
   }
 
   switch(st.type){
-  case T_FILE:
+  case T_FILE:  // 是文件就立即输出
     printf("%s %d %d %l\n", fmtname(path), st.type, st.ino, st.size);
     break;
 
